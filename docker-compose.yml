@@ -1,0 +1,103 @@
+version: '3.8'
+
+# Определяем сервисы для приложения
+services:
+  # База данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: django_mai_db
+    restart: unless-stopped
+    # Переменные окружения для PostgreSQL
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-django_mai_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
+    # Постоянное хранилище данных
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Внутренний порт базы данных
+    ports:
+      - "5433:5432"
+    # Подключаем к внутренней сети
+    networks:
+      - django_network
+    # Проверка здоровья контейнера
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Django backend приложение
+  web:
+    build: .
+    container_name: django_mai_web
+    restart: unless-stopped
+    # Переменные окружения для Django
+    env_file:
+      - environment.env
+    # Подключаем волюмы для статических и медиа файлов
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    # Внутренний порт Django
+    ports:
+      - "8000:8000"
+    # Зависимости - Django запускается после базы данных
+    depends_on:
+      db:
+        condition: service_healthy
+    # Подключаем к внутренней сети
+    networks:
+      - django_network
+    # Проверка здоровья Django приложения
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/users/auth-status/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx веб-сервер
+  nginx:
+    image: nginx:alpine
+    container_name: django_mai_nginx
+    restart: unless-stopped
+    # Порты для доступа к приложению
+    ports:
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS (для будущего использования)
+    # Подключаем конфигурацию и статические файлы
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    # Nginx запускается после Django
+    depends_on:
+      web:
+        condition: service_healthy
+    # Подключаем к внутренней сети
+    networks:
+      - django_network
+
+# Определяем постоянные волюмы для хранения данных
+volumes:
+  # Данные PostgreSQL - сохраняются между перезапусками
+  postgres_data:
+    driver: local
+  # Статические файлы Django (CSS, JS, изображения)
+  static_volume:
+    driver: local
+  # Медиа файлы пользователей (загружаемые файлы)
+  media_volume:
+    driver: local
+
+# Создаем изолированную сеть для приложения
+networks:
+  django_network:
+    driver: bridge
+    # Настройки сети
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "django-mai"
+version = "0.1.0"
+description = "Django DRF проект с аутентификацией"
+authors = ["Your Name <your.email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = "^4.2"
+djangorestframework = "^3.14"
+python-decouple = "^3.8"  # Для работы с .env файлами
+psycopg2-binary = "^2.9"  # PostgreSQL драйвер
+django-cors-headers = "^4.3"  # Для CORS
+gunicorn = "^21.2"  # WSGI сервер для продакшена
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.0"  # Форматирование кода
+isort = "^5.12"  # Сортировка импортов
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api" 
