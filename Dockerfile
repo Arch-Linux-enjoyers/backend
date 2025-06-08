@@ -33,7 +33,7 @@ ENV POETRY_VENV_IN_PROJECT=false \
 WORKDIR /app
 
 # Копируем файлы Poetry для установки зависимостей
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 
 # Устанавливаем зависимости
 RUN poetry install --only=main --no-root && rm -rf $POETRY_CACHE_DIR
