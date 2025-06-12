@@ -20,7 +20,9 @@ services:
       - "5433:5432"
     # Подключаем к внутренней сети
     networks:
-      - django_network
+      django_network:
+        ipv4_address: 172.20.1.1
+
     # Проверка здоровья контейнера
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
