@@ -1,4 +1,5 @@
 [tool.poetry]
+package-mode = false
 name = "django-mai"
 version = "0.1.0"
 description = "Django DRF проект с аутентификацией"
@@ -13,10 +14,10 @@ psycopg2-binary = "^2.9"  # PostgreSQL драйвер
 django-cors-headers = "^4.3"  # Для CORS
 gunicorn = "^21.2"  # WSGI сервер для продакшена
 drf-yasg = "^1.21.10"
+pillow = "^11.2.1"
+djangorestframework-simplejwt = "^5.5.0"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.0"  # Форматирование кода
-isort = "^5.12"  # Сортировка импортов
 ruff = "^0.11.13"
 
 [tool.ruff]
@@ -98,6 +99,7 @@ ignore = [
     "T201",
     "RUF002",
     "ERA001",
+    "INP001",
 ]
 fixable = ["ALL"]
 unfixable = []

@@ -61,9 +61,6 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Docker
-.dockerignore
-
 # Poetry
 poetry.lock
 
@@ -89,3 +86,6 @@ dmypy.json
 
 # Test files
 cookies.txt 
+
+# Project files
+storages

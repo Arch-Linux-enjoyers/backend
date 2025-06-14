@@ -10,8 +10,6 @@ from django.urls import path
 from . import views
 
 
-app_name = 'users'
-
 urlpatterns = [
     # Эндпоинт для регистрации нового пользователя
     # POST /api/users/register/

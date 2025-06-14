@@ -4,7 +4,10 @@ Views для аутентификации и управления пользов
 Содержит API endpoints для регистрации, входа, выхода и получения профиля.
 '''
 
+from django.conf import settings as django_settings
 from django.contrib.auth import login, logout
+from django.middleware.csrf import get_token
+from django.utils.cache import patch_vary_headers
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.request import Request
@@ -15,6 +18,25 @@ from .serializers import (
     UserRegistrationSerializer,
     UserSerializer,
 )
+
+
+@api_view(['GET'])
+def get_csrf_cookie(request: Request) -> Response:
+    '''API for getting an CSRF token for other API requests.'''
+    response = Response({'csrfToken': get_token(request)})
+    response.set_cookie(
+        django_settings.CSRF_COOKIE_NAME,
+        request.META['CSRF_COOKIE'],
+        max_age=django_settings.CSRF_COOKIE_AGE,
+        domain=django_settings.CSRF_COOKIE_DOMAIN,
+        path=django_settings.CSRF_COOKIE_PATH,
+        secure=django_settings.CSRF_COOKIE_SECURE,
+        httponly=django_settings.CSRF_COOKIE_HTTPONLY,
+        samesite=django_settings.CSRF_COOKIE_SAMESITE,
+    )
+    # Set the Vary header since content varies with the CSRF cookie.
+    patch_vary_headers(response, ('Cookie',))
+    return response
 
 
 @api_view(['POST'])
@@ -68,6 +90,7 @@ def login_view(request: Request) -> Response:
     - username: имя пользователя или email
     - password: пароль
     '''
+    print('view')
     serializer = LoginSerializer(
         data=request.data, context={'request': request}
     )

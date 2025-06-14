@@ -10,9 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 '''
 
+from datetime import timedelta
 from pathlib import Path
 
 from decouple import config
+from django.core.files.storage import FileSystemStorage
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -58,6 +60,7 @@ INSTALLED_APPS = [
 
     # Local apps
     'users',
+    'courses',
 ]
 
 MIDDLEWARE = [
@@ -65,7 +68,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django_mai.middleware.CSRF.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -145,8 +149,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/storages/'
+MEDIA_ROOT = BASE_DIR / 'storages'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -156,7 +160,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',  # Сессионная аутентификация
+        # 'rest_framework.authentication.SessionAuthentication'
+        # 'django_mai.middleware.DRFAuthenticate.SessionAuthentication'
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # По умолчанию требуется аутентификация
@@ -168,10 +174,25 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,  # Размер страницы для пагинации
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
 # CORS settings - настройки для разрешения кросс-доменных запросов
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # React dev server
+    'http://127.0.0.1:5173',  # React dev server
     'http://localhost:8000',  # Django dev server
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF
+CSRF_USE_SESSIONS = False
+
+# Storages
+IMAGES_STORAGE = FileSystemStorage(
+    location=Path.joinpath(BASE_DIR, 'storages/images'),
+    base_url='/storages/images/'
+)
