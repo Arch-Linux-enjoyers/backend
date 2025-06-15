@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
     # Переменные окружения для Django
     env_file:
-      - environment.env
+      - .env
     # Подключаем волюмы для статических и медиа файлов
     volumes:
       - static_volume:/app/staticfiles
@@ -51,7 +51,8 @@ services:
         condition: service_healthy
     # Подключаем к внутренней сети
     networks:
-      - django_network
+      django_network:
+        ipv4_address: 172.20.0.2
     # Проверка здоровья Django приложения
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/users/auth-status/"]

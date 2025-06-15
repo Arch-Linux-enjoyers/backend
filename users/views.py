@@ -153,7 +153,7 @@ def profile_view(request: Request) -> Response:
     serializer = UserSerializer(user)
 
     return Response(
-        {'message': 'Профиль пользователя', 'user': serializer.data},
+        serializer.data,
         status=status.HTTP_200_OK,
     )
 
@@ -189,10 +189,7 @@ def update_profile_view(request: Request) -> Response:
         serializer.save()
 
         return Response(
-            {
-                'message': 'Профиль успешно обновлен',
-                'user': serializer.data,
-            },
+            serializer.data,
             status=status.HTTP_200_OK,
         )
 

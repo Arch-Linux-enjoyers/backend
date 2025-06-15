@@ -5,6 +5,7 @@
 '''
 import typing as ty
 
+from django.conf import settings as django_settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -17,6 +18,12 @@ class User(AbstractUser):
     '''
 
     # Дополнительные поля пользователя
+    avatar = models.ImageField(
+        verbose_name='avatars',
+        storage=django_settings.IMAGES_STORAGE,
+        default='defaults/user.png'
+    )
+
     phone_number = models.CharField(
         max_length=20,
         blank=True,

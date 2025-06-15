@@ -1,13 +1,16 @@
-import typing as ty
-
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from courses.models import Course
-from courses.serializers import CourseSerializer
+from courses.serializers import CompletedCourseSerializer, CourseSerializer
 
 
 class CoursesViewSet(ModelViewSet):
     serializer_class = CourseSerializer
-    permission_classes: ty.ClassVar[list[BasePermission]] = [IsAuthenticated]
-    queryset = Course.objects.all()
+    permission_classes = (IsAuthenticated)
+    queryset = serializer_class.Meta.model.objects.all()
+
+
+class CompletedCoursesViewSet(ModelViewSet):
+    serializer_class = CompletedCourseSerializer
+    permission_classes = (IsAuthenticated)
+    queryset = serializer_class.Meta.model.objects.all()
