@@ -7,6 +7,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
+from . import exceptions
 from .models import User
 
 
@@ -17,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
     Используется для отображения информации о пользователе.
     '''
 
-    class Meta:
+    class Meta:  # noqa: D106
         model = User
         exclude = ('password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'is_verified')
         read_only_fields = ('id', 'created_at', 'updated_at', 'is_verified')
@@ -59,7 +60,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'email': {'required': True},  # Email обязателен
         }
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict) -> dict:
         '''
         Валидация данных регистрации.
 
@@ -69,26 +70,27 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password_confirm = attrs.get('password_confirm')
 
         if password != password_confirm:
-            raise serializers.ValidationError('Пароли не совпадают')
+            raise exceptions.PasswordsDontMatchError
 
         return attrs
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict) -> type[User]:
         '''
         Создание нового пользователя.
+
         Удаляет поле подтверждения пароля и хеширует пароль.
         '''
         # Удаляем поле подтверждения пароля
         validated_data.pop('password_confirm', None)
 
-        # Создаем пользователя с хешированным паролем
-        user = User.objects.create_user(**validated_data)
-        return user
+        # Создаем пользователя с хешированным паролем  # noqa: RUF003
+        return User.objects.create_user(**validated_data)
 
 
 class LoginSerializer(serializers.Serializer):
     '''
     Сериализатор для аутентификации пользователя.
+
     Обрабатывает логин по username/email и паролю.
     '''
 
@@ -99,9 +101,10 @@ class LoginSerializer(serializers.Serializer):
         help_text='Пароль пользователя',
     )
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict) -> dict:
         '''
         Валидация данных для входа.
+
         Проверяет существование пользователя и правильность пароля.
         '''
         username = attrs.get('username')
@@ -128,18 +131,12 @@ class LoginSerializer(serializers.Serializer):
                     pass
 
             if not user:
-                raise serializers.ValidationError(
-                    'Неверное имя пользователя/email или пароль'
-                )
+                raise exceptions.InvalidLoginOrPasswordError
 
             if not user.is_active:
-                raise serializers.ValidationError(
-                    'Аккаунт пользователя отключен'
-                )
+                raise exceptions.UserAccountDeactivatedError
 
             attrs['user'] = user
             return attrs
 
-        raise serializers.ValidationError(
-            'Необходимо указать имя пользователя и пароль'
-        )
+        raise exceptions.UsernameOrPasswordDontProvidedError

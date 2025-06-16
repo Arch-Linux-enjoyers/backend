@@ -10,8 +10,16 @@ class CourseSerializer(ModelSerializer):
         fields = '__all__'
 
 
-class CompletedCourseSerializer(ModelSerializer):
+class CompletedCourseWriteSerializer(ModelSerializer):
 
     class Meta:  # noqa: D106
+        model = CompletedCourse
+        fields = '__all__'
+
+
+class CompletedCourseReadSerializer(ModelSerializer):
+
+    class Meta:  # noqa: D106
+        depth = 1
         model = CompletedCourse
         fields = '__all__'

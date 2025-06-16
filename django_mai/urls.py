@@ -56,7 +56,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('api/users/', include('users.urls')),
-    path('api/', include(courses_router.urls)),
+    path('api/courses/', include(courses_router.urls)),
+
+    # print(courses_router.urls)
 ]
 
 # Добавляем обслуживание медиа файлов в режиме разработки
